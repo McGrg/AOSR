@@ -24,8 +24,9 @@ namespace AOSR
     /// </summary>
     public partial class MainWindow : Window
     {
-        private string filename, docNumber, date, florNumber, project, kindofwork;
+        private string filename, docNumber, date, florNumber, project, kindofwork, height;
         private const string filenameSource= "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\АОСР.xlsx";
+        private const string axes = "в осях 1/А3-32/М3";
         private Excel.Application app = null;
         private Excel.Workbook wBook = null;
         private Excel.Worksheet wSheet = null;
@@ -152,6 +153,45 @@ namespace AOSR
             DocNumberTextBox.Text = docNumber;
             DateTextBox.Text = date;
             FlorNumberTextBox.Text = florNumber;
+        }
+
+        private void MakePhrase()
+        {
+
+        }
+
+        private string HeightChoose(string florNumb)
+        {
+            double h = 0;
+            string height = "";
+            try
+            {
+                h = double.Parse(florNumb);
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString(), "Error happend: ");
+            }
+            if (h<4)
+                {
+                   switch (h)
+                   {
+                    case 1:
+                        height = "0.000";
+                        break;
+                    case 2:
+                        height = "3.200";
+                        break;
+                    case 3:
+                        height = "5.600";
+                        break;
+                    default:
+                        height = "0";
+                        break;
+                   }
+                }
+            else height = (8.4 + (h - 4) * 2.8).ToString()+"00";
+            return height;
         }
         
     }
