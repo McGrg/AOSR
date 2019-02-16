@@ -39,8 +39,12 @@ namespace AOSR
         public MainWindow()
         {
             InitializeComponent();
+            LoadSource();
             JobComboBox.MaxDropDownHeight = 100;
             ProjectComboBox.MaxDropDownHeight = 100;
+            MaterialsComboBox.MaxDropDownHeight = 100;
+            NextWorkComboBox.MaxDropDownHeight = 100;
+            ApplicationsComboBox.MaxDropDownHeight = 100;
         }
 
         private void InsertBtn_Click(object sender, RoutedEventArgs e)
@@ -91,35 +95,29 @@ namespace AOSR
         //
         // Заполнение Combobox значениями из файла-источника
         //
-        private void OpenSourceBtn_Click(object sender, RoutedEventArgs e)
+        private void LoadSource()
         {
             try
             {
-                OpenFileDialog opf = new OpenFileDialog();
-                opf.Filter = "Документы Excel(*.xls;*.xlsx)|*.xls;*.xlsx";
-                opf.ShowDialog();
-                filename = opf.FileName;
-                FileNameTextBox.Text = filename;
                 app = new Excel.Application();
-                wBook = app.Workbooks.Open(filename);
+                wBook = app.Workbooks.Open("D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\АОСР.xlsx");
                 wSheet = (Excel.Worksheet)wBook.Sheets[1];
                 string temp= "test";
                 int i = 1;
                 while (temp != "")
                 {
-                    temp = wSheet.Cells[i, 19].Text;
-                    //kindofworks.Add(temp);
+                    temp = wSheet.Cells[i, 4].Text;
                     JobComboBox.Items.Add(temp);
-                    temp = wSheet.Cells[i, 20].Text;
+                    temp = wSheet.Cells[i, 5].Text;
                     ProjectComboBox.Items.Add(temp);
+                    temp = wSheet.Cells[i, 6].Text;
+                    MaterialsComboBox.Items.Add(temp);
+                    temp = wSheet.Cells[i, 7].Text;
+                    NextWorkComboBox.Items.Add(temp);
+                    temp = wSheet.Cells[i, 8].Text;
+                    ApplicationsComboBox.Items.Add(temp);
                     i++;
                 }
-                
-                //docNumber = wSheet.Cells[11, 2].Text;
-                //MessageBox.Show(docNumber.ToString(), "Message: ");
-                //date = wSheet.Cells[11, 9].Text;
-                //florNumber = wSheet.Cells[11, 9].Text;
-                //FillRanges();
             }
             catch (Exception ex)
             {
@@ -145,11 +143,8 @@ namespace AOSR
             DocNumberTextBox.Text = "";
             DateTextBox.Text = "";
             FlorNumberTextBox.Text = "";
-            JobComboBox.Items.Clear();
-            JobComboBox.SelectedIndex = 0;
-            ProjectComboBox.Items.Clear();
-            ProjectComboBox.SelectedIndex = 0;
         }
+
         //
         //заполнение текстовых полей
         //
