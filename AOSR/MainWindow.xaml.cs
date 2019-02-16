@@ -25,16 +25,10 @@ namespace AOSR
     public partial class MainWindow : Window
     {
         private string filename, docNumber, date, florNumber, project, kindofwork;
-        private string filenameSource;
+        private const string filenameSource= "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\АОСР.xlsx";
         private Excel.Application app = null;
         private Excel.Workbook wBook = null;
         private Excel.Worksheet wSheet = null;
-        private Excel.Range range = null;
-        private Excel.Application appSource = null;
-        private Excel.Workbook wBookSource = null;
-        private Excel.Worksheet wSheetSource = null;
-        //private List<String> kindofworks = new List<String>();
-        //private List<String> projects = new List<String>();
 
         public MainWindow()
         {
@@ -71,8 +65,6 @@ namespace AOSR
                 date = wSheet.Cells[11, 9].Text;
                 florNumber = wSheet.Cells[11, 9].Text;
                 FillRanges();
-
-
             }
             catch (Exception ex)
             {
@@ -94,36 +86,43 @@ namespace AOSR
         }
         //
         // Заполнение Combobox значениями из файла-источника
+        // Адрес файла источника D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\АОСР.xlsx
         //
         private void LoadSource()
         {
+          Excel.Application appSource = null;
+          Excel.Workbook wBookSource = null;
+          Excel.Worksheet wSheetSource = null;
             try
             {
-                app = new Excel.Application();
-                wBook = app.Workbooks.Open("D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\АОСР.xlsx");
-                wSheet = (Excel.Worksheet)wBook.Sheets[1];
+                appSource = new Excel.Application();
+                wBookSource = appSource.Workbooks.Open(filenameSource);
+                wSheetSource = (Excel.Worksheet)wBookSource.Sheets[1];
                 string temp= "test";
                 int i = 1;
                 while (temp != "")
                 {
-                    temp = wSheet.Cells[i, 4].Text;
+                    temp = wSheetSource.Cells[i, 4].Text;
                     JobComboBox.Items.Add(temp);
-                    temp = wSheet.Cells[i, 5].Text;
+                    temp = wSheetSource.Cells[i, 5].Text;
                     ProjectComboBox.Items.Add(temp);
-                    temp = wSheet.Cells[i, 6].Text;
+                    temp = wSheetSource.Cells[i, 6].Text;
                     MaterialsComboBox.Items.Add(temp);
-                    temp = wSheet.Cells[i, 7].Text;
+                    temp = wSheetSource.Cells[i, 7].Text;
                     NextWorkComboBox.Items.Add(temp);
-                    temp = wSheet.Cells[i, 8].Text;
+                    temp = wSheetSource.Cells[i, 8].Text;
                     ApplicationsComboBox.Items.Add(temp);
                     i++;
                 }
             }
             catch (Exception ex)
             {
-                wBook.Close();
-                app.Quit();
                 MessageBox.Show(ex.Message.ToString(), "Error happend: ");
+            }
+            finally
+            {
+                wBookSource.Close();
+                appSource.Quit();
             }
         }
                     
