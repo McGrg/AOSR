@@ -41,23 +41,23 @@
             </DockPanel>
             <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
                 <Label DockPanel.Dock="Left" Content="Вид работ" VerticalAlignment="Center"/>
-                <ComboBox x:Name="JobComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" Margin="25 0 0 0" />
+                <ComboBox x:Name="JobComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" MaxWidth="400" Margin="25 0 0 0" />
             </DockPanel>
             <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
                 <Label DockPanel.Dock="Left" Content="Проектная документация" VerticalAlignment="Center"/>
-                <ComboBox x:Name="ProjectComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" Margin="25 0 0 0" />
+                <ComboBox x:Name="ProjectComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" MaxWidth="400" Margin="25 0 0 0" />
             </DockPanel>
             <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
                 <Label DockPanel.Dock="Left" Content="Применяемые материалы" VerticalAlignment="Center"/>
-                <ComboBox x:Name="MaterialsComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" Margin="25 0 0 0" />
+                <ComboBox x:Name="MaterialsComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" MaxWidth="400" Margin="25 0 0 0" />
             </DockPanel>
             <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
                 <Label DockPanel.Dock="Left" Content="Последующие работы" VerticalAlignment="Center"/>
-                <ComboBox x:Name="NextWorkComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" Margin="25 0 0 0" />
+                <ComboBox x:Name="NextWorkComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" MaxWidth="400" Margin="25 0 0 0" />
             </DockPanel>
             <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
                 <Label DockPanel.Dock="Left" Content="Прилагаемые документы" VerticalAlignment="Center"/>
-                <ComboBox x:Name="ApplicationsComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" Margin="25 0 0 0" />
+                <ComboBox x:Name="ApplicationsComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" MaxWidth="400" Margin="25 0 0 0" />
             </DockPanel>
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Margin="5">
