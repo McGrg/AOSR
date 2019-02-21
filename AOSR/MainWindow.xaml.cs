@@ -1,21 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections;
 using System.Windows;
 using Microsoft.Win32;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Excel = Microsoft.Office.Interop.Excel;
-//using Spire.Xls;
-using PdfSharp;
+using System.IO;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
+
+
+
+
 
 namespace AOSR
 {
@@ -30,7 +24,7 @@ namespace AOSR
         private Excel.Application app = null;
         private Excel.Workbook wBook = null;
         private Excel.Worksheet wSheet = null;
-
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -44,6 +38,7 @@ namespace AOSR
 
         private void InsertBtn_Click(object sender, RoutedEventArgs e)
         {
+           
             if (CheckFilled())
                 {
                 designer = ProjectComboBox.SelectedValue.ToString();
@@ -222,6 +217,53 @@ namespace AOSR
         {
             string text = kindOfWork + " " + florNumber + " этаж, на отм." + height + ", " + axes;
             return text;
+        }
+
+        static string[] GetFiles()
+        {
+            DirectoryInfo dirInfo = new DirectoryInfo("../../../../PDFs");
+            FileInfo[] fileInfos = dirInfo.GetFiles("*.pdf");
+            ArrayList list = new ArrayList();
+            foreach (FileInfo info in fileInfos)
+            {
+                // HACK: Just skip the protected samples file...
+                if (info.Name.IndexOf("protected") == -1)
+                    list.Add(info.FullName);
+            }
+            return (string[])list.ToArray(typeof(string));
+        }
+
+        // <summary>
+        // Imports all pages from a list of documents.
+        // </summary>
+        static void Variant1()
+        {
+            // Get some file names
+            string[] files = GetFiles();
+
+            // Open the output document
+            PdfDocument outputDocument = new PdfDocument();
+
+            // Iterate files
+            foreach (string file in files)
+            {
+                // Open the document to import pages from it.
+                PdfDocument inputDocument = PdfReader.Open(file, PdfDocumentOpenMode.Import);
+
+                // Iterate pages
+                int count = inputDocument.PageCount;
+                for (int idx = 0; idx < count; idx++)
+                {
+                    // Get the page from the external document...
+                    PdfPage page = inputDocument.Pages[idx];
+                    // ...and add it to the output document.
+                    outputDocument.AddPage(page);
+                }
+            }
+
+            // Save the document...
+            string filename = "ConcatenatedDocument1.pdf";
+            outputDocument.Save(filename);
         }
 
     }
