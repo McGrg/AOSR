@@ -6,6 +6,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 using System.IO;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
+using System.Collections.Generic;
 
 
 
@@ -19,47 +20,67 @@ namespace AOSR
     public partial class MainWindow : Window
     {
         private string filename, docNumber, date, florNumber, project, kindofwork, height, designer, material, nextWork, documents;
-        private const string filenameSource= "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Source.xlsx";
+        private const string filenameSource= "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Source.xlsx"; //расположение файла источника для полей формы
+        private const string appdir = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Сертификаты"; // расположение папки с сертификатами и приложениями
+        private const string toSaveDir = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\";
         private const string axes = "в осях 1/А3-32/М3";
         private Excel.Application app = null;
         private Excel.Workbook wBook = null;
         private Excel.Worksheet wSheet = null;
-        
+        private List<string> appList = new List<string>(); //список всех файлов в папке с приложениями
+        private List<string> fileToAdd = new List<string>(); //список файлов с приложениями для добавления в один PDF файл
+
         public MainWindow()
         {
             InitializeComponent();
-            LoadSource();
             JobComboBox.MaxDropDownHeight = 100;
             ProjectComboBox.MaxDropDownHeight = 100;
             MaterialsComboBox.MaxDropDownHeight = 100;
             NextWorkComboBox.MaxDropDownHeight = 100;
             ApplicationsComboBox.MaxDropDownHeight = 100;
+            LoadSource(); //загрузка данных в приложение за файла источника для полей формы
+            GetAppList(); //загрузка в appList списка файлов из папки с приложениями
         }
 
-        private void InsertBtn_Click(object sender, RoutedEventArgs e)
+        //
+        // Заполнение Combobox значениями из файла-источника
+        // Адрес файла источника D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\АОСР.xlsx
+        //
+        private void LoadSource()
         {
-           
-            if (CheckFilled())
-                {
-                designer = ProjectComboBox.SelectedValue.ToString();
-                kindofwork = JobComboBox.SelectedValue.ToString();
-                material = MaterialsComboBox.SelectedValue.ToString();
-                nextWork = NextWorkComboBox.SelectedValue.ToString();
-                documents = ApplicationsComboBox.SelectedValue.ToString();
-                florNumber = FlorNumberTextBox.Text;
-                height = HeightChoose(florNumber);
-                kindofwork = Phrase(kindofwork, florNumber, height);
-                wSheet.Cells[11, 2].Value = DocNumberTextBox.Text;
-                wSheet.Cells[11, 9].Value = DateTextBox.Text;
-                wSheet.Cells[24, 1].Value = kindofwork;
-                wSheet.Cells[26, 1].Value = designer;
-                wSheet.Cells[29, 1].Value = material;
-                wSheet.Cells[40, 1].Value = nextWork;
-                wSheet.Cells[47, 1].Value = documents;
-            }
-            else
+            Excel.Application appSource = null;
+            Excel.Workbook wBookSource = null;
+            Excel.Worksheet wSheetSource = null;
+            try
             {
-                MessageBox.Show("CheckBoxes should be filled first", "Error happend: ");
+                appSource = new Excel.Application();
+                wBookSource = appSource.Workbooks.Open(filenameSource);
+                wSheetSource = (Excel.Worksheet)wBookSource.Sheets[1];
+                string temp = "test";
+                int i = 1;
+                while (temp != "")
+                {
+                    temp = wSheetSource.Cells[i, 4].Text;
+                    JobComboBox.Items.Add(temp);
+                    temp = wSheetSource.Cells[i, 5].Text;
+                    ProjectComboBox.Items.Add(temp);
+                    temp = wSheetSource.Cells[i, 6].Text;
+                    MaterialsComboBox.Items.Add(temp);
+                    temp = wSheetSource.Cells[i, 7].Text;
+                    NextWorkComboBox.Items.Add(temp);
+                    temp = wSheetSource.Cells[i, 8].Text;
+                    ApplicationsComboBox.Items.Add(temp);
+                    i++;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString(), "Error happend: ");
+            }
+            finally
+            {
+                wBookSource.Close();
+                appSource.Quit();
             }
         }
 
@@ -88,15 +109,52 @@ namespace AOSR
             }
         }
 
-        private bool CheckFilled ()
+        //
+        //заполнение выходного файла Excel данными на основании заполненной формы
+        //
+        private void InsertBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (JobComboBox.SelectedValue !=null && ProjectComboBox.SelectedValue!=null && MaterialsComboBox.SelectedValue !=null && NextWorkComboBox.SelectedValue !=null && ApplicationsComboBox.SelectedValue !=null)
-            {
-                return true;
+           
+            if (CheckFilled())
+                {
+                designer = ProjectComboBox.SelectedValue.ToString();
+                kindofwork = JobComboBox.SelectedValue.ToString();
+                material = MaterialsComboBox.SelectedValue.ToString();
+                nextWork = NextWorkComboBox.SelectedValue.ToString();
+                //documents = ApplicationsComboBox.SelectedValue.ToString();
+                florNumber = FlorNumberTextBox.Text;
+                height = HeightChoose(florNumber);
+                kindofwork = Phrase(kindofwork, florNumber, height); //добавление к работам этажа, отметки, осей
+                wSheet.Cells[11, 2].Value = DocNumberTextBox.Text;
+                wSheet.Cells[11, 9].Value = DateTextBox.Text;
+                wSheet.Cells[24, 1].Value = kindofwork;
+                wSheet.Cells[26, 1].Value = designer;
+                wSheet.Cells[29, 1].Value = material;
+                wSheet.Cells[40, 1].Value = nextWork;
+                documents = "";
+                //
+                // добавление имен файлов в список для создания pdf в соответствии с указанными материалами
+                //
+                string dataSource = material.ToLower().Replace("-", "/"); 
+                foreach (string item in appList)
+                {
+                    if (SearchText(item, dataSource))
+                    {
+                        string itemFullName = appdir + "\\" + item;
+                        fileToAdd.Add(itemFullName);
+                        documents = documents + item + " ";
+                    }
+                }
+                wSheet.Cells[47, 1].Value = documents;
             }
-            else return false;
+            else
+            {
+                MessageBox.Show("CheckBoxes should be filled first", "Error happend: ");
+            }
         }
-
+        //
+        // сохранение файла XLS и многостраничного PDF с приложениями
+        //
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
@@ -104,60 +162,30 @@ namespace AOSR
             sfd.ShowDialog();
             filename = sfd.FileName;
             wBook.SaveAs(filename);
-            wBook.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, filename + ".pdf");
+            filename = filename + ".pdf";
+            wBook.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, filename);
             wBook.Close();
-            
+            MakePDF(filename, fileToAdd);
         }
-        //
-        // Заполнение Combobox значениями из файла-источника
-        // Адрес файла источника D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\АОСР.xlsx
-        //
-        private void LoadSource()
+
+        private void CancelBtn_Click(object sender, RoutedEventArgs e)
         {
-          Excel.Application appSource = null;
-          Excel.Workbook wBookSource = null;
-          Excel.Worksheet wSheetSource = null;
-            try
-            {
-                appSource = new Excel.Application();
-                wBookSource = appSource.Workbooks.Open(filenameSource);
-                wSheetSource = (Excel.Worksheet)wBookSource.Sheets[1];
-                string temp= "test";
-                int i = 1;
-                while (temp != "")
-                {
-                    temp = wSheetSource.Cells[i, 4].Text;
-                    JobComboBox.Items.Add(temp);
-                    temp = wSheetSource.Cells[i, 5].Text;
-                    ProjectComboBox.Items.Add(temp);
-                    temp = wSheetSource.Cells[i, 6].Text;
-                    MaterialsComboBox.Items.Add(temp);
-                    temp = wSheetSource.Cells[i, 7].Text;
-                    NextWorkComboBox.Items.Add(temp);
-                    temp = wSheetSource.Cells[i, 8].Text;
-                    ApplicationsComboBox.Items.Add(temp);
-                    i++;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message.ToString(), "Error happend: ");
-            }
-            finally
-            {
-                wBookSource.Close();
-                appSource.Quit();
-            }
+            Cleaning();
         }
-                    
+
         private void ExitBtn_Click(object sender, RoutedEventArgs e)
         {
             Cleaning();
             this.Close();
         }
-        private void CancelBtn_Click(object sender, RoutedEventArgs e)
+
+        private bool CheckFilled ()
         {
-            Cleaning();
+            if (JobComboBox.SelectedValue !=null && ProjectComboBox.SelectedValue!=null && MaterialsComboBox.SelectedValue !=null && NextWorkComboBox.SelectedValue !=null)
+            {
+                return true;
+            }
+            else return false;
         }
 
         private void Cleaning()
@@ -169,7 +197,7 @@ namespace AOSR
         }
 
         //
-        //заполнение текстовых полей
+        //заполнение текстовых полей формы
         //
         private void FillRanges()
         {
@@ -177,6 +205,9 @@ namespace AOSR
             DateTextBox.Text = date;
         }
 
+        //
+        // высотная отметка проведения работ в зависимости от этажа
+        //
         private string HeightChoose(string florNumb)
         {
             double h = 0;
@@ -219,34 +250,20 @@ namespace AOSR
             return text;
         }
 
-        static string[] GetFiles()
-        {
-            DirectoryInfo dirInfo = new DirectoryInfo("../../../../PDFs");
-            FileInfo[] fileInfos = dirInfo.GetFiles("*.pdf");
-            ArrayList list = new ArrayList();
-            foreach (FileInfo info in fileInfos)
-            {
-                // HACK: Just skip the protected samples file...
-                if (info.Name.IndexOf("protected") == -1)
-                    list.Add(info.FullName);
-            }
-            return (string[])list.ToArray(typeof(string));
-        }
+        //
+        //создание многостраничного PDF с приложениями, на входе исходный PDF файл и список файлов для приложения
+        //
 
-        // <summary>
-        // Imports all pages from a list of documents.
-        // </summary>
-        static void Variant1()
+        private void MakePDF(string pdfFileName, List<string> fileArray)
         {
-            // Get some file names
-            string[] files = GetFiles();
-
+            MessageBox.Show(pdfFileName, "Opening first PDF");
             // Open the output document
-            PdfDocument outputDocument = new PdfDocument();
+            PdfDocument outputDocument = PdfReader.Open(pdfFileName);
 
             // Iterate files
-            foreach (string file in files)
+            foreach (string file in fileArray)
             {
+                MessageBox.Show(file, "Opening PDF");
                 // Open the document to import pages from it.
                 PdfDocument inputDocument = PdfReader.Open(file, PdfDocumentOpenMode.Import);
 
@@ -259,11 +276,53 @@ namespace AOSR
                     // ...and add it to the output document.
                     outputDocument.AddPage(page);
                 }
+
+                outputDocument.Save(pdfFileName);
             }
 
-            // Save the document...
-            string filename = "ConcatenatedDocument1.pdf";
-            outputDocument.Save(filename);
+        }
+
+        //
+        //заполнение appList файлами из директории с приложениями
+        //
+        private void GetAppList()
+        {
+            try
+            {
+                DirectoryInfo dir = new DirectoryInfo(appdir);
+                if (dir.Exists)
+                foreach (var item in dir.GetFiles())
+                {
+                    appList.Add(item.Name);
+                }
+                else
+                    MessageBox.Show("Such directory doesn't exist!", "Error happend in opening application directory: ");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString(), "Error happend in opening application directory: ");
+            }
+        }
+
+        //
+        //поиск в материалах данных для списка приложений
+        //
+        private static bool SearchText(string example, string source)
+        {
+            example = example.ToLower().Trim().Remove(example.Length - 4, 4).Replace("-", "/");
+            int index = example.IndexOf('№');
+            if ((index == 0) || (index > 0))
+            {
+                example = example.Substring(index);
+                index = example.IndexOf("от");
+                if ((index == 0) || (index > 0))
+                    example = example.Substring(0, index);
+            }
+            if (source.Contains(example))
+            {
+                return true;
+            }
+            else return false;
         }
 
     }
