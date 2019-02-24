@@ -60,8 +60,6 @@ namespace AOSR
                 int i = 1;
                 while (temp != "")
                 {
-                    temp = wSheetSource.Cells[i, 4].Text;
-                    JobComboBox.Items.Add(temp);
                     temp = wSheetSource.Cells[i, 5].Text;
                     ProjectComboBox.Items.Add(temp);
                     temp = wSheetSource.Cells[i, 6].Text;
@@ -70,6 +68,8 @@ namespace AOSR
                     NextWorkComboBox.Items.Add(temp);
                     temp = wSheetSource.Cells[i, 8].Text;
                     ApplicationsComboBox.Items.Add(temp);
+                    temp = wSheetSource.Cells[i, 4].Text;
+                    JobComboBox.Items.Add(temp);
                     i++;
                 }
             }
@@ -125,13 +125,14 @@ namespace AOSR
                 florNumber = FlorNumberTextBox.Text;
                 height = HeightChoose(florNumber);
                 kindofwork = Phrase(kindofwork, florNumber, height); //добавление к работам этажа, отметки, осей
+                nextWork = Phrase(nextWork, florNumber, height); //добавление к работам этажа, отметки, осей
                 wSheet.Cells[11, 2].Value = DocNumberTextBox.Text;
                 wSheet.Cells[11, 9].Value = DateTextBox.Text;
                 wSheet.Cells[24, 1].Value = kindofwork;
                 wSheet.Cells[26, 1].Value = designer;
                 wSheet.Cells[29, 1].Value = material;
                 wSheet.Cells[40, 1].Value = nextWork;
-                documents = "";
+                documents = "";// заглушка!!!
                 //
                 // добавление имен файлов в список для создания pdf в соответствии с указанными материалами
                 //
@@ -142,7 +143,7 @@ namespace AOSR
                     {
                         string itemFullName = appdir + "\\" + item;
                         fileToAdd.Add(itemFullName);
-                        documents = documents + item + " ";
+                        documents = documents + item.Replace(".pdf","") + ", ";
                     }
                 }
                 wSheet.Cells[47, 1].Value = documents;
@@ -166,6 +167,13 @@ namespace AOSR
             wBook.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, filename);
             wBook.Close();
             MakePDF(filename, fileToAdd);
+        }
+
+        private void PropertyButton_Click(object sender, RoutedEventArgs e)
+        {
+            Prop propWindow = new Prop();
+            propWindow.Owner = this;
+            propWindow.Show();
         }
 
         private void CancelBtn_Click(object sender, RoutedEventArgs e)
@@ -238,15 +246,15 @@ namespace AOSR
                         break;
                    }
                 }
-            else height = (8.4 + (h - 4) * 2.8).ToString()+"00";
+            else height = (8.4 + (h - 4) * 2.8).ToString()+"00";//добавить вариант, если с десятичными знаками и без.
             return height;
         }
         //
         // возвращает фразу с данными по работам, этажу, осями, отметками
         //
-        private string Phrase (string kindOfWork, string florNumber, string height)
+        private string Phrase (string textToForm, string florNumber, string height)
         {
-            string text = kindOfWork + " " + florNumber + " этаж, на отм." + height + ", " + axes;
+            string text = textToForm + " " + florNumber + " этаж, на отм." + height + ", " + axes;
             return text;
         }
 
@@ -256,28 +264,39 @@ namespace AOSR
 
         private void MakePDF(string pdfFileName, List<string> fileArray)
         {
-            MessageBox.Show(pdfFileName, "Opening first PDF");
-            // Open the output document
-            PdfDocument outputDocument = PdfReader.Open(pdfFileName);
 
-            // Iterate files
-            foreach (string file in fileArray)
+            try
             {
-                MessageBox.Show(file, "Opening PDF");
-                // Open the document to import pages from it.
-                PdfDocument inputDocument = PdfReader.Open(file, PdfDocumentOpenMode.Import);
+                //MessageBox.Show(pdfFileName, "Opening first PDF");
+                // Open the output document
+                PdfDocument outputDocument = PdfReader.Open(pdfFileName);
 
-                // Iterate pages
-                int count = inputDocument.PageCount;
-                for (int idx = 0; idx < count; idx++)
+                // Iterate files
+                foreach (string file in fileArray)
                 {
-                    // Get the page from the external document...
-                    PdfPage page = inputDocument.Pages[idx];
-                    // ...and add it to the output document.
-                    outputDocument.AddPage(page);
-                }
+                    //MessageBox.Show(file, "Opening PDF");
+                    // Open the document to import pages from it.
+                    PdfDocument inputDocument = PdfReader.Open(file, PdfDocumentOpenMode.Import);
 
-                outputDocument.Save(pdfFileName);
+                    // Iterate pages
+                    int count = inputDocument.PageCount;
+                    for (int idx = 0; idx < count; idx++)
+                    {
+                        // Get the page from the external document...
+                        PdfPage page = inputDocument.Pages[idx];
+                        // ...and add it to the output document.
+                        outputDocument.AddPage(page);
+                    }
+
+                    outputDocument.Save(pdfFileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                //
+                //сделать обработчик исключения, создать отдельную папку и сохранить в нее файл PDF и все приложения PDF
+                //
+                MessageBox.Show(ex.ToString() + " all applications have been saved in separate directory", "PDF saving file error!");
             }
 
         }

@@ -59,6 +59,9 @@
                 <Label DockPanel.Dock="Left" Content="Прилагаемые документы" VerticalAlignment="Center"/>
                 <ComboBox x:Name="ApplicationsComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" MaxWidth="400" Margin="25 0 0 0" />
             </DockPanel>
+            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
+                <Button x:Name="PropertyButton" Template="{StaticResource btTemplate}" DockPanel.Dock="Right" Content="     Свойства" Margin="15 0 0 0" MinWidth="70" Width="115" Height="20" Click="PropertyButton_Click" />
+            </DockPanel>
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Margin="5">
             <DockPanel LastChildFill="False">
@@ -66,7 +69,6 @@
                 <Button x:Name="CancelBtn" Template="{StaticResource btTemplate}" HorizontalContentAlignment="Center" DockPanel.Dock="Right" Content="Отмена" Margin="15 0 15 0" MinWidth="70" Click="CancelBtn_Click"></Button>
                 <Button x:Name="IncertBtn" Template="{StaticResource btTemplate}" HorizontalContentAlignment="Center" DockPanel.Dock="Left" Content="Вставить текст" Margin="15 0 15 0" MinWidth="60" Click="InsertBtn_Click"></Button>
                 <Button x:Name="OpenBtn" Template="{StaticResource btTemplate}" HorizontalContentAlignment="Center" DockPanel.Dock="Left" Content="Открыть файл" Margin="15 0 15 0" MinWidth="60" Click="OpenBtn_Click"></Button>
-                <!--<Button x:Name="OpenSourceBtn" Template="{StaticResource btTemplate}" HorizontalContentAlignment="Center" DockPanel.Dock="Left" Content="Открыть источник" Margin="15 0 15 0" MinWidth="60" Click="OpenSourceBtn_Click"></Button>-->
                 <Button x:Name="SaveBtn" Template="{StaticResource btTemplate}" HorizontalContentAlignment="Center" DockPanel.Dock="Left" Content="Сохранить файл" Margin="15 0 15 0" MinWidth="60" Click="SaveBtn_Click"></Button>
             </DockPanel>
         </StackPanel>
