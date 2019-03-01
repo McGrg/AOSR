@@ -27,25 +27,12 @@
                 <Label DockPanel.Dock="Left" Content="File Name" VerticalAlignment="Center"/>
                 <TextBox x:Name="FileNameTextBox" DockPanel.Dock="Right" VerticalAlignment="Center" MinWidth="500"/>
             </DockPanel>
-            <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Margin="5">
-                <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5"/>
-            </StackPanel>
-            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5"/>
-            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5"/>
-            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5"/>
-            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5"/>
-            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5"/>
-            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5"/>
-            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
-                <Button x:Name="PropertyButton" Template="{StaticResource btTemplate}" DockPanel.Dock="Right" Content="     Свойства" Margin="15 0 0 0" MinWidth="70" Width="115" Height="20" Click="PropertyButton_Click" />
-            </DockPanel>
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Margin="5">
             <DockPanel LastChildFill="False">
                 <Button x:Name="ExitBtn" Template="{StaticResource btTemplate}" HorizontalAlignment="Center" DockPanel.Dock="Right" Content="Закрыть" Margin="15 0 15 0" MinWidth="70" Click="ExitBtn_Click"></Button>
                 <Button x:Name="CancelBtn" Template="{StaticResource btTemplate}" HorizontalContentAlignment="Center" DockPanel.Dock="Right" Content="Отмена" Margin="15 0 15 0" MinWidth="70" Click="CancelBtn_Click"></Button>
                 <Button x:Name="DirectoryBtn" Template="{StaticResource btTemplate}" HorizontalContentAlignment="Center" DockPanel.Dock="Left" Content="Выбор папки" Margin="15 0 15 0" MinWidth="60" Click="DirectoryBtn_Click"></Button>
-                <Button x:Name="OpenBtn" Template="{StaticResource btTemplate}" HorizontalContentAlignment="Center" DockPanel.Dock="Left" Content="Открыть файл" Margin="15 0 15 0" MinWidth="60" Click="OpenBtn_Click"></Button>
             </DockPanel>
         </StackPanel>
 
