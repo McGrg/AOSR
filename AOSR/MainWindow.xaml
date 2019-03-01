@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AOSR"
         mc:Ignorable="d"
-        Title="AOCP" Height="450" MinWidth="800" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Cursor="Hand">
+        Title="AOCP" Height="200" MinWidth="600" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Cursor="Hand">
     <Window.Resources>
         <ControlTemplate TargetType="Button" x:Key="btTemplate">
             <Border CornerRadius="3" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Height="{TemplateBinding Height}" Width="{TemplateBinding Width}">
@@ -18,58 +18,34 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="90*"></RowDefinition>
-            <RowDefinition Height="10*"></RowDefinition>
+            <RowDefinition Height="45*"></RowDefinition>
+            <RowDefinition Height="11*"></RowDefinition>
         </Grid.RowDefinitions>
-        <Label x:Name="label" Content="Текст" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Column="0" Grid.Row="0" Margin="272,0"/>
-        <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Margin="5">
+        <Label x:Name="label" Content="Текст" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Column="0" Grid.Row="0" Margin="376,0" Height="26" Width="38"/>
+        <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0" Margin="5">
             <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 25 25 5">
                 <Label DockPanel.Dock="Left" Content="File Name" VerticalAlignment="Center"/>
                 <TextBox x:Name="FileNameTextBox" DockPanel.Dock="Right" VerticalAlignment="Center" MinWidth="500"/>
             </DockPanel>
             <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Margin="5">
-                <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
-                    <Label DockPanel.Dock="Left" Content="Номер акта" VerticalAlignment="Center"/>
-                    <TextBox x:Name="DocNumberTextBox" DockPanel.Dock="Left"   VerticalAlignment="Center" MinWidth="100" Margin="25 0 0 0" />
-                    <TextBox x:Name="DateTextBox" DockPanel.Dock="Right" VerticalAlignment="Center" MinWidth="100"/>
-                    <Label DockPanel.Dock="Right" Content="Дата акта" VerticalAlignment="Center"/>
-                </DockPanel>
+                <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5"/>
             </StackPanel>
-            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
-                <Label DockPanel.Dock="Left" Content="Номер этажа" VerticalAlignment="Center"/>
-                <TextBox x:Name="FlorNumberTextBox" DockPanel.Dock="Left"   VerticalAlignment="Center" MinWidth="100" Margin="25 0 0 0" />
-            </DockPanel>
-            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
-                <Label DockPanel.Dock="Left" Content="Вид работ" VerticalAlignment="Center"/>
-                <ComboBox x:Name="JobComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" MaxWidth="400" Margin="25 0 0 0" />
-            </DockPanel>
-            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
-                <Label DockPanel.Dock="Left" Content="Проектная документация" VerticalAlignment="Center"/>
-                <ComboBox x:Name="ProjectComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" MaxWidth="400" Margin="25 0 0 0" />
-            </DockPanel>
-            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
-                <Label DockPanel.Dock="Left" Content="Применяемые материалы" VerticalAlignment="Center"/>
-                <ComboBox x:Name="MaterialsComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" MaxWidth="400" Margin="25 0 0 0" />
-            </DockPanel>
-            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
-                <Label DockPanel.Dock="Left" Content="Последующие работы" VerticalAlignment="Center"/>
-                <ComboBox x:Name="NextWorkComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" MaxWidth="400" Margin="25 0 0 0" />
-            </DockPanel>
-            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
-                <Label DockPanel.Dock="Left" Content="Прилагаемые документы" VerticalAlignment="Center"/>
-                <ComboBox x:Name="ApplicationsComboBox" DockPanel.Dock="Right"   VerticalAlignment="Center" MinWidth="200" MaxWidth="400" Margin="25 0 0 0" />
-            </DockPanel>
+            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5"/>
+            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5"/>
+            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5"/>
+            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5"/>
+            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5"/>
+            <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5"/>
             <DockPanel LastChildFill="False" VerticalAlignment="Center" Margin="25 5 25 5">
                 <Button x:Name="PropertyButton" Template="{StaticResource btTemplate}" DockPanel.Dock="Right" Content="     Свойства" Margin="15 0 0 0" MinWidth="70" Width="115" Height="20" Click="PropertyButton_Click" />
             </DockPanel>
         </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Margin="5">
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="5">
             <DockPanel LastChildFill="False">
                 <Button x:Name="ExitBtn" Template="{StaticResource btTemplate}" HorizontalAlignment="Center" DockPanel.Dock="Right" Content="Закрыть" Margin="15 0 15 0" MinWidth="70" Click="ExitBtn_Click"></Button>
                 <Button x:Name="CancelBtn" Template="{StaticResource btTemplate}" HorizontalContentAlignment="Center" DockPanel.Dock="Right" Content="Отмена" Margin="15 0 15 0" MinWidth="70" Click="CancelBtn_Click"></Button>
-                <Button x:Name="IncertBtn" Template="{StaticResource btTemplate}" HorizontalContentAlignment="Center" DockPanel.Dock="Left" Content="Вставить текст" Margin="15 0 15 0" MinWidth="60" Click="InsertBtn_Click"></Button>
+                <Button x:Name="DirectoryBtn" Template="{StaticResource btTemplate}" HorizontalContentAlignment="Center" DockPanel.Dock="Left" Content="Выбор папки" Margin="15 0 15 0" MinWidth="60" Click="DirectoryBtn_Click"></Button>
                 <Button x:Name="OpenBtn" Template="{StaticResource btTemplate}" HorizontalContentAlignment="Center" DockPanel.Dock="Left" Content="Открыть файл" Margin="15 0 15 0" MinWidth="60" Click="OpenBtn_Click"></Button>
-                <Button x:Name="SaveBtn" Template="{StaticResource btTemplate}" HorizontalContentAlignment="Center" DockPanel.Dock="Left" Content="Сохранить файл" Margin="15 0 15 0" MinWidth="60" Click="SaveBtn_Click"></Button>
             </DockPanel>
         </StackPanel>
 
