@@ -21,7 +21,7 @@ namespace AOSR
         private const string filenameSource= "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Source.xlsx"; //расположение файла источника для полей формы
         private const string appdir = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Сертификаты"; // расположение папки с сертификатами и приложениями
         private const string toSaveDir = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\";
-        private const string listOfWorks = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Акты поэтажка без работ по АППОР - копия.xlsx"; // расположение файла с данными по всем актам
+        private const string listOfWorks = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Акты поэтажка без работ по АППОР.xlsx"; // расположение файла с данными по всем актам
         private const string filename = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\АОСР2 - копия.xls"; // расположение файла образца для актов
         private const string fileAppl = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Сопроводиловка.xlsx"; // расположение файла описи
         private const string axes = "в осях 1/А3-32/М3";
@@ -193,7 +193,7 @@ namespace AOSR
                 wBook = app.Workbooks.Open(filename);
                 wSheet = (Excel.Worksheet)wBook.Sheets[1];
                 string temp = "test";
-                for (int row =9; row<11; row++ )//счетчик по строкам временно на 1 строку
+                for (int row =9; row<10; row++ )//счетчик по строкам временно на 1 строку
                 { 
                     florNumber = wSheetSource.Cells[row, 1].Text;
                     int act = 0;
@@ -279,7 +279,13 @@ namespace AOSR
                     {
                         if (paper != " ")
                         {
+                            wSheetInventory.Cells[n, 3].WrapText = false;
                             wSheetInventory.Cells[n, 2].Value = i;
+                            if (paper.Length>60)
+                            {
+                                wSheetInventory.Cells[n, 3].WrapText = true;
+                                wSheetInventory.Cells[n, 3].RowHeight = 40;
+                            }
                             wSheetInventory.Cells[n, 3].Value = paper;
                             wSheetInventory.Cells[n, 10].Value = "1 экз.";
                             Excel.Range line = (Excel.Range)wSheetInventory.Rows[n + 1];
