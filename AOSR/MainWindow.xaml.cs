@@ -21,14 +21,15 @@ namespace AOSR
         private const string filenameSource= "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Source.xlsx"; //расположение файла источника для полей формы
         private const string appdir = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Сертификаты"; // расположение папки с сертификатами и приложениями
         private const string toSaveDir = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\";
-        private const string listOfWorks = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Акты поэтажка без работ по АППОР.xlsx"; // расположение файла с данными по всем актам
+        private const string listOfWorks = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Акты поэтажка без работ по АППОР - копия.xlsx"; // расположение файла с данными по всем актам
         private const string filename = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\АОСР2 - копия.xls"; // расположение файла образца для актов
+        private const string fileAppl = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Сопроводиловка.xlsx"; // расположение файла описи
         private const string axes = "в осях 1/А3-32/М3";
         private Excel.Application app = null;
         private Excel.Workbook wBook = null;
         private Excel.Worksheet wSheet = null;
         private List<string> appList = new List<string>(); //список всех файлов в папке с приложениями
-        private List<string> fileToAdd = new List<string>(); //список файлов с приложениями для добавления в один PDF файл
+        private List<string> fileToAdd=null; //список файлов с приложениями для добавления в один PDF файл
 
         public MainWindow()
         {
@@ -192,30 +193,31 @@ namespace AOSR
                 wBook = app.Workbooks.Open(filename);
                 wSheet = (Excel.Worksheet)wBook.Sheets[1];
                 string temp = "test";
-                for (int row =9; row<10; row++ )//счетчик по строкам временно на 1 строку
+                for (int row =9; row<11; row++ )//счетчик по строкам временно на 1 строку
                 { 
                     florNumber = wSheetSource.Cells[row, 1].Text;
-                    Win.MessageBox.Show("florNumber-" + florNumber, "Cell name: ");
                     int act = 0;
+                    //Win.MessageBox.Show("florNumber-" + florNumber, "Cell name: ");
                     for (int column =2; column<84; column++)
                     {
                         temp = wSheetSource.Cells[row, column].Text;
                         if (temp!= "")
                         {
-                            Win.MessageBox.Show("row-"+row + "colunn-" + column, "Cell name: ");
+                            //Win.MessageBox.Show("row-"+row + "colunn-" + column, "Cell name: ");
                             act++;
                             height = HeightChoose(florNumber);
                             docNumber = "№ 3." + florNumber + "." + act.ToString();
                             date = "«15» ноября 2018 г.";
-                            kindofwork = wSheetSource.Cells[row, 7].Text + " " + wSheetSource.Cells[row, 6].Text + " " + florNumber + " этаж, на отм. +" + height + ", " + axes;
-                            Win.MessageBox.Show("kindofwork-" + kindofwork, "Input: ");
-                            designer = wSheetSource.Cells[row, 4].Text;
-                            Win.MessageBox.Show("designer-" + designer, "Input: ");
-                            material = wSheetSource.Cells[row, 5].Text;
-                            Win.MessageBox.Show("material-" + material, "Input: ");
-                            nextWork = wSheetSource.Cells[row, 3].Text;
-                            Win.MessageBox.Show("nextWork-" + nextWork, "Input: ");
+                            kindofwork = wSheetSource.Cells[7, column].Text + " " + wSheetSource.Cells[6, column].Text + " " + florNumber + " этаж, на отм. +" + height + ", " + axes;
+                            //Win.MessageBox.Show("kindofwork-" + kindofwork, "Input: ");
+                            designer = wSheetSource.Cells[4, column].Text;
+                            //Win.MessageBox.Show("designer-" + designer, "Input: ");
+                            material = wSheetSource.Cells[5, column].Text;
+                            //Win.MessageBox.Show("material-" + material, "Input: ");
+                            nextWork = wSheetSource.Cells[3, column].Text;
+                            //Win.MessageBox.Show("nextWork-" + nextWork, "Input: ");
                             documents = "";
+                            fileToAdd = new List<string>();
                             string dataSource = material.ToLower().Replace("-", "/");
                             foreach (string item in appList)
                             {
@@ -232,6 +234,7 @@ namespace AOSR
                         }
                     }
                 }
+                Win.MessageBox.Show("Task completed!", "System: ");
             }
             catch (Exception ex)
             {
@@ -241,6 +244,8 @@ namespace AOSR
             {
                 wBookSource.Close();
                 appSource.Quit();
+                wBook.Close();
+                app.Quit();
             }
         }
 
@@ -252,12 +257,62 @@ namespace AOSR
             wSheet.Cells[26, 1].Value = designer;
             wSheet.Cells[29, 1].Value = material;
             wSheet.Cells[40, 1].Value = nextWork;
-            wSheet.Cells[47, 1].Value = documents;
+            //
+            // заполнение описи в случае более 5 приложений к акту
+            //
+            if (fileToAdd.Count>5)
+            {
+                Excel.Application appInventory = null;
+                Excel.Workbook wBookInventory = null;
+                Excel.Worksheet wSheetInventory = null;
+                wSheet.Cells[47, 1].Value = "в соответствием с листом описи";
+                try
+                {
+                    appInventory = new Excel.Application();
+                    wBookInventory = appInventory.Workbooks.Open(fileAppl);
+                    wSheetInventory = (Excel.Worksheet)wBookInventory.Sheets[1];
+                    wSheetInventory.Cells[7, 2].Value = "Опись передаваемых документов к акту " + docNumber;
+                    int i = 1;
+                    int n = 11;
+                    string[] invent = documents.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string paper in invent)
+                    {
+                        if (paper != " ")
+                        {
+                            wSheetInventory.Cells[n, 2].Value = i;
+                            wSheetInventory.Cells[n, 3].Value = paper;
+                            wSheetInventory.Cells[n, 10].Value = "1 экз.";
+                            Excel.Range line = (Excel.Range)wSheetInventory.Rows[n + 1];
+                            line.Insert();
+                            string column1Numb = "C" + n.ToString();
+                            string column2Numb = "I" + n.ToString();
+                            line = (Excel.Range)wSheetInventory.Range[column1Numb, column2Numb];
+                            line.Merge();
+                            i++;
+                            n++;
+                        }
+                    }
+                    string name = pathName + "\\" + "Акт" + docNumber + " опись";
+                    wBookInventory.SaveAs(name + ".xls");
+                    wBookInventory.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, name + ".pdf");
+                }
+                catch (Exception ex)
+                {
+                    Win.MessageBox.Show(ex.Message.ToString(), "Error happend in opening Inventory file: ");
+                }
+                finally
+                {
+                    wBookInventory.Close();
+                    appInventory.Quit();
+                }
+            }
+            else wSheet.Cells[47, 1].Value = documents;
         }
 
         private void DirectoryBtn_Click(object sender, Win.RoutedEventArgs e)
         {
             Forms.FolderBrowserDialog folder = new Forms.FolderBrowserDialog();
+            folder.SelectedPath = toSaveDir;
             Forms.DialogResult res = folder.ShowDialog();
             pathName = folder.SelectedPath;
             if (pathName != "")
