@@ -56,21 +56,12 @@ namespace AOSR
         //
         // высотная отметка проведения работ в зависимости от этажа
         //
-        private string HeightChoose(string florNumb)
+        private string HeightChoose(int flor)
         {
-            double h = 0;
             string height = "";
-            try
-            {
-                h = double.Parse(florNumb);
-            }
-            catch(Exception ex)
-            {
-                Win.MessageBox.Show(ex.Message.ToString(), "Error happend in parsing: ");
-            }
-            if (h<4)
+            if (flor<4)
                 {
-                   switch (h)
+                   switch (flor)
                    {
                     case 1:
                         height = "0.000";
@@ -86,7 +77,7 @@ namespace AOSR
                         break;
                    }
                 }
-            else height = (8.4 + (h - 4) * 2.8).ToString()+"00";//добавить вариант, если с десятичными знаками и без.
+            else height = (8.4 + (flor - 4) * 2.8).ToString()+"00";//добавить вариант, если с десятичными знаками и без.
             return height;
         }
 
@@ -188,27 +179,41 @@ namespace AOSR
             {
                 appSource = new Excel.Application();
                 wBookSource = appSource.Workbooks.Open(listOfWorks);
-                wSheetSource = (Excel.Worksheet)wBookSource.Sheets[1];
+                wSheetSource = (Excel.Worksheet)wBookSource.Sheets[1];// 1-этажи 2-26, 6 - лестница Н1
                 app = new Excel.Application();
                 wBook = app.Workbooks.Open(filename);
                 wSheet = (Excel.Worksheet)wBook.Sheets[1];
                 string temp = "test";
-                for (int row =9; row<10; row++ )//счетчик по строкам временно на 1 строку
+                for (int row =9; row<34; row++ )//счетчик по строкам временно на 1 строку
                 { 
-                    florNumber = wSheetSource.Cells[row, 1].Text;
+                    florNumber = wSheetSource.Cells[row, 1].Text;//колонка 1 - номер этажа
                     int act = 0;
                     //Win.MessageBox.Show("florNumber-" + florNumber, "Cell name: ");
-                    for (int column =2; column<84; column++)
+                    for (int column =16; column<17; column++)// колонки с данными 2-106 для этажей, 2-25 для лестницы Н1
                     {
                         temp = wSheetSource.Cells[row, column].Text;
                         if (temp!= "")
                         {
                             //Win.MessageBox.Show("row-"+row + "colunn-" + column, "Cell name: ");
                             act++;
-                            height = HeightChoose(florNumber);
+                            if (florNumber != "")
+                            {
+                                int res = 0;
+                                if (int.TryParse(height,out res))
+                                height = HeightChoose(res);
+                            }
+                            else
+                            {
+                                height = null;
+                            }
                             docNumber = "№ 3." + florNumber + "." + act.ToString();
                             date = "«15» ноября 2018 г.";
-                            kindofwork = wSheetSource.Cells[7, column].Text + " " + wSheetSource.Cells[6, column].Text + " " + florNumber + " этаж, на отм. +" + height + ", " + axes;
+                            string text="";
+                            if (height != null)
+                            {
+                                text = " на отм. +" + height + ", ";
+                            }
+                            kindofwork = wSheetSource.Cells[7, column].Text + " " + wSheetSource.Cells[6, column].Text + " " + florNumber + " этаж," + text + axes;
                             //Win.MessageBox.Show("kindofwork-" + kindofwork, "Input: ");
                             designer = wSheetSource.Cells[4, column].Text;
                             //Win.MessageBox.Show("designer-" + designer, "Input: ");
