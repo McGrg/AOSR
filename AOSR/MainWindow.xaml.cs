@@ -17,12 +17,12 @@ namespace AOSR
     /// </summary>
     public partial class MainWindow : Win.Window
     {
-        private string docNumber, date, florNumber, project, kindofwork, height, designer, material, nextWork, documents, pathName;
+        private string docNumber, startdate, finishdate, florNumber, kindofwork, height, designer, material, nextWork, documents, pathName, subcontractor;
         private const string filenameSource= "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Source.xlsx"; //расположение файла источника для полей формы
         private const string appdir = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Сертификаты"; // расположение папки с сертификатами и приложениями
         private const string toSaveDir = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\";
         private const string listOfWorks = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Акты поэтажка без работ по АППОР.xlsx"; // расположение файла с данными по всем актам
-        private const string filename = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\АОСР2 - копия.xls"; // расположение файла образца для актов
+        private const string filename = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Образец АОСР.xlsx"; // расположение файла образца для актов
         private const string fileAppl = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Сопроводиловка.xlsx"; // расположение файла описи
         private const string axes = "в осях 1/А3-32/М3";
         private Excel.Application app = null;
@@ -37,93 +37,6 @@ namespace AOSR
             GetAppList(); //загрузка в appList списка файлов из папки с приложениями
         }
 
-        private void CancelBtn_Click(object sender, Win.RoutedEventArgs e)
-        {
-            Cleaning();
-        }
-
-        private void ExitBtn_Click(object sender, Win.RoutedEventArgs e)
-        {
-            Cleaning();
-            this.Close();
-        }
-
-        private void Cleaning()
-        {
-            FileNameTextBox.Text = "";
-        }
-
-        //
-        // высотная отметка проведения работ в зависимости от этажа
-        //
-        private string HeightChoose(int flor)
-        {
-            string height = "";
-            if (flor<4)
-                {
-                   switch (flor)
-                   {
-                    case 1:
-                        height = "0.000";
-                        break;
-                    case 2:
-                        height = "3.200";
-                        break;
-                    case 3:
-                        height = "5.600";
-                        break;
-                    default:
-                        height = "0";
-                        break;
-                   }
-                }
-            else height = (8.4 + (flor - 4) * 2.8).ToString()+"00";//добавить вариант, если с десятичными знаками и без.
-            return height;
-        }
-
-        //
-        //создание многостраничного PDF с приложениями, на входе исходный PDF файл и список файлов для приложения
-        //
-
-        private void MakePDF(string pdfFileName, List<string> fileArray)
-        {
-
-            try
-            {
-                //MessageBox.Show(pdfFileName, "Opening first PDF");
-                // Open the output document
-                PdfDocument outputDocument = PdfReader.Open(pdfFileName);
-
-                // Iterate files
-                foreach (string file in fileArray)
-                {
-                    //MessageBox.Show(file, "Opening PDF");
-                    // Open the document to import pages from it.
-                    PdfDocument inputDocument = PdfReader.Open(file, PdfDocumentOpenMode.Import);
-
-                    // Iterate pages
-                    int count = inputDocument.PageCount;
-                    for (int idx = 0; idx < count; idx++)
-                    {
-                        // Get the page from the external document...
-                        PdfPage page = inputDocument.Pages[idx];
-                        // ...and add it to the output document.
-                        outputDocument.AddPage(page);
-                    }
-
-                    outputDocument.Save(pdfFileName);
-                }
-            }
-            catch (Exception ex)
-            {
-                //
-                //сделать обработчик исключения, создать отдельную папку и сохранить в нее файл PDF и все приложения PDF
-                //
-                Win.MessageBox.Show(ex.ToString() + " all applications have been saved in separate directory", "PDF saving file error!");
-            }
-
-        }
-
         //
         //заполнение appList файлами из директории с приложениями
         //
@@ -133,10 +46,10 @@ namespace AOSR
             {
                 DirectoryInfo dir = new DirectoryInfo(appdir);
                 if (dir.Exists)
-                foreach (var item in dir.GetFiles())
-                {
-                    appList.Add(item.Name);
-                }
+                    foreach (var item in dir.GetFiles())
+                    {
+                        appList.Add(item.Name);
+                    }
                 else
                     Win.MessageBox.Show("Such directory doesn't exist!", "Error happend in opening application directory: ");
             }
@@ -144,27 +57,6 @@ namespace AOSR
             {
                 Win.MessageBox.Show(ex.Message.ToString(), "Error happend in opening application directory: ");
             }
-        }
-
-        //
-        //поиск в материалах данных для списка приложений
-        //
-        private static bool SearchText(string example, string source)
-        {
-            example = example.ToLower().Trim().Remove(example.Length - 4, 4).Replace("-", "/");
-            int index = example.IndexOf('№');
-            if ((index == 0) || (index > 0))
-            {
-                example = example.Substring(index);
-                index = example.IndexOf("от");
-                if ((index == 0) || (index > 0))
-                    example = example.Substring(0, index);
-            }
-            if (source.Contains(example))
-            {
-                return true;
-            }
-            else return false;
         }
 
         //
@@ -184,22 +76,23 @@ namespace AOSR
                 wBook = app.Workbooks.Open(filename);
                 wSheet = (Excel.Worksheet)wBook.Sheets[1];
                 string temp = "test";
-                for (int row =9; row<34; row++ )//счетчик по строкам временно на 1 строку
+                for (int row =9; row<10; row++ )//счетчик по строкам временно на 1 строку
                 { 
                     florNumber = wSheetSource.Cells[row, 1].Text;//колонка 1 - номер этажа
+                    startdate = wSheetSource.Cells[row, 2].Text;
+                    finishdate = wSheetSource.Cells[row, 3].Text;
+                    subcontractor = wSheetSource.Cells[row, 109].Text;
                     int act = 0;
-                    //Win.MessageBox.Show("florNumber-" + florNumber, "Cell name: ");
-                    for (int column =16; column<17; column++)// колонки с данными 2-106 для этажей, 2-25 для лестницы Н1
+                    for (int column =4; column<55; column++)// колонки с данными 4-108 для этажей, 4-27 для лестницы Н1
                     {
                         temp = wSheetSource.Cells[row, column].Text;
                         if (temp!= "")
                         {
-                            //Win.MessageBox.Show("row-"+row + "colunn-" + column, "Cell name: ");
                             act++;
                             if (florNumber != "")
                             {
                                 int res = 0;
-                                if (int.TryParse(height,out res))
+                                if (int.TryParse(florNumber, out res))
                                 height = HeightChoose(res);
                             }
                             else
@@ -207,20 +100,15 @@ namespace AOSR
                                 height = null;
                             }
                             docNumber = "№ 3." + florNumber + "." + act.ToString();
-                            date = "«15» ноября 2018 г.";
                             string text="";
                             if (height != null)
                             {
                                 text = " на отм. +" + height + ", ";
                             }
                             kindofwork = wSheetSource.Cells[7, column].Text + " " + wSheetSource.Cells[6, column].Text + " " + florNumber + " этаж," + text + axes;
-                            //Win.MessageBox.Show("kindofwork-" + kindofwork, "Input: ");
                             designer = wSheetSource.Cells[4, column].Text;
-                            //Win.MessageBox.Show("designer-" + designer, "Input: ");
                             material = wSheetSource.Cells[5, column].Text;
-                            //Win.MessageBox.Show("material-" + material, "Input: ");
                             nextWork = wSheetSource.Cells[3, column].Text;
-                            //Win.MessageBox.Show("nextWork-" + nextWork, "Input: ");
                             documents = "";
                             fileToAdd = new List<string>();
                             string dataSource = material.ToLower().Replace("-", "/");
@@ -257,11 +145,19 @@ namespace AOSR
         private void Insert()
         {
             wSheet.Cells[11, 2].Value = docNumber;
-            wSheet.Cells[11, 9].Value = date;
-            wSheet.Cells[24, 1].Value = kindofwork;
-            wSheet.Cells[26, 1].Value = designer;
-            wSheet.Cells[29, 1].Value = material;
-            wSheet.Cells[40, 1].Value = nextWork;
+            wSheet.Cells[11, 9].Value = finishdate;
+            wSheet.Cells[42, 5].Value = finishdate;
+            wSheet.Cells[41, 5].Value = startdate;
+            wSheet.Cells[31, 1].Value = kindofwork;
+            wSheet.Cells[33, 1].Value = designer;
+            int rowheight = 0;
+            if (material.Length < 100) rowheight = 20;
+            else if (material.Length < 300) rowheight = 50;
+            else if (material.Length < 500) rowheight = 80;
+            else rowheight = 120;
+            wSheet.Cells[36, 1].RowHeight = rowheight;
+            wSheet.Cells[36, 1].Value = material;
+            wSheet.Cells[47, 1].Value = nextWork;
             //
             // заполнение описи в случае более 5 приложений к акту
             //
@@ -270,7 +166,8 @@ namespace AOSR
                 Excel.Application appInventory = null;
                 Excel.Workbook wBookInventory = null;
                 Excel.Worksheet wSheetInventory = null;
-                wSheet.Cells[47, 1].Value = "в соответствием с листом описи";
+                wSheet.Cells[54, 1].RowHeight = 15;
+                wSheet.Cells[54, 1].Value = "в соответствием с листом описи";
                 try
                 {
                     appInventory = new Excel.Application();
@@ -317,7 +214,20 @@ namespace AOSR
                     appInventory.Quit();
                 }
             }
-            else wSheet.Cells[47, 1].Value = documents;
+            else wSheet.Cells[54, 1].Value = documents;
+            if (subcontractor == "")
+            {
+                wSheet.Cells[25, 1].Value = "";
+                wSheet.Cells[25, 1].RowHeight = 10;
+                wSheet.Cells[26, 1].Value = "";
+                wSheet.Cells[26, 1].RowHeight = 10;
+                wSheet.Cells[71, 1].Value = "";
+                wSheet.Cells[71, 1].RowHeight = 10;
+                wSheet.Cells[72, 1].Value = "";
+                wSheet.Cells[72, 1].RowHeight = 10;
+                wSheet.Cells[73, 1].Value = "";
+                wSheet.Cells[73, 1].RowHeight = 10;
+            }
         }
 
         private void DirectoryBtn_Click(object sender, Win.RoutedEventArgs e)
@@ -335,6 +245,116 @@ namespace AOSR
             wBook.SaveAs(filetosave+".xls");
             wBook.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, filetosave+".pdf");
             MakePDF(filetosave + ".pdf", fileToAdd);
+        }
+
+        //
+        // высотная отметка проведения работ в зависимости от этажа
+        //
+        private string HeightChoose(int flor)
+        {
+            string height = "";
+            if (flor < 4)
+            {
+                switch (flor)
+                {
+                    case 1:
+                        height = "0.000";
+                        break;
+                    case 2:
+                        height = "3.200";
+                        break;
+                    case 3:
+                        height = "5.600";
+                        break;
+                    default:
+                        height = "0";
+                        break;
+                }
+            }
+            else
+            {
+                double res;
+                res = (8.4 + (flor - 4) * 2.8);
+                height = string.Format("{0:0.000}", res);
+            }
+            return height;
+        }
+
+        //
+        //создание многостраничного PDF с приложениями, на входе исходный PDF файл и список файлов для приложения
+        //
+        private void MakePDF(string pdfFileName, List<string> fileArray)
+        {
+
+            try
+            {
+                // Open the output document
+                PdfDocument outputDocument = PdfReader.Open(pdfFileName);
+
+                // Iterate files
+                foreach (string file in fileArray)
+                {
+                    // Open the document to import pages from it.
+                    PdfDocument inputDocument = PdfReader.Open(file, PdfDocumentOpenMode.Import);
+
+                    // Iterate pages
+                    int count = inputDocument.PageCount;
+                    for (int idx = 0; idx < count; idx++)
+                    {
+                        // Get the page from the external document...
+                        PdfPage page = inputDocument.Pages[idx];
+                        // ...and add it to the output document.
+                        outputDocument.AddPage(page);
+                    }
+
+                    outputDocument.Save(pdfFileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                //
+                //сделать обработчик исключения, создать отдельную папку и сохранить в нее файл PDF и все приложения PDF
+                //
+                Win.MessageBox.Show(ex.ToString() + " all applications have been saved in separate directory", "PDF saving file error!");
+            }
+
+        }
+
+        //
+        //поиск в материалах данных для списка приложений
+        //
+        private static bool SearchText(string example, string source)
+        {
+            example = example.ToLower().Trim().Remove(example.Length - 4, 4).Replace("-", "/");
+            int index = example.IndexOf('№');
+            if ((index == 0) || (index > 0))
+            {
+                example = example.Substring(index);
+                index = example.IndexOf("от");
+                if ((index == 0) || (index > 0))
+                    example = example.Substring(0, index);
+            }
+            if (source.Contains(example))
+            {
+                return true;
+            }
+            else return false;
+        }
+
+        private void CancelBtn_Click(object sender, Win.RoutedEventArgs e)
+        {
+            Cleaning();
+        }
+
+        private void ExitBtn_Click(object sender, Win.RoutedEventArgs e)
+        {
+            Cleaning();
+            this.Close();
+        }
+
+        private void Cleaning()
+        {
+            FileNameTextBox.Text = "";
         }
     }
 }
