@@ -17,7 +17,8 @@ namespace AOSR
     /// </summary>
     public partial class MainWindow : Win.Window
     {
-        private string docNumber, startdate, finishdate, florNumber, kindofwork, height, designer, material, nextWork, documents, pathName, subcontractor;
+        private string docNumber, startdate, finishdate, florNumber, kindofwork, height, designer, material, nextWork, documents, pathName;
+        private int inventoryCounter;
         private const string filenameSource= "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Source.xlsx"; //расположение файла источника для полей формы
         private const string appdir = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\Сертификаты"; // расположение папки с сертификатами и приложениями
         private const string toSaveDir = "D:\\Работа\\Интеллект Про\\Корпус 3\\АОСР\\";
@@ -71,19 +72,23 @@ namespace AOSR
             {
                 appSource = new Excel.Application();
                 wBookSource = appSource.Workbooks.Open(listOfWorks);
-                wSheetSource = (Excel.Worksheet)wBookSource.Sheets[1];// 1-этажи 2-26, 6 - лестница Н1
+                wSheetSource = (Excel.Worksheet)wBookSource.Sheets[1];// 1-этажи 2-26, 2 - 1-й этаж, 3 - 2-й этаж, 4 - лестница Н1
                 app = new Excel.Application();
                 wBook = app.Workbooks.Open(filename);
                 wSheet = (Excel.Worksheet)wBook.Sheets[1];
                 string temp = "test";
-                for (int row =9; row<10; row++ )//счетчик по строкам временно на 1 строку
-                { 
-                    florNumber = wSheetSource.Cells[row, 1].Text;//колонка 1 - номер этажа
-                    startdate = wSheetSource.Cells[row, 2].Text;
-                    finishdate = wSheetSource.Cells[row, 3].Text;
-                    subcontractor = wSheetSource.Cells[row, 109].Text;
-                    int act = 0;
-                    for (int column =4; column<55; column++)// колонки с данными 4-108 для этажей, 4-27 для лестницы Н1
+                int act = 0;
+                for (int row =9; row<17; row++)//счетчик по строкам временно на 1 строку, по строку 109 для этажей
+                {
+                    if (florNumber != wSheetSource.Cells[row, 1].Text)
+                    {
+                        florNumber = wSheetSource.Cells[row, 1].Text;//колонка 1 - номер этажа
+                        act = 0;
+                    }
+                    startdate = wSheetSource.Cells[row, 2].Text;//колонка 2 - дата начала работ
+                    finishdate = wSheetSource.Cells[row, 3].Text;//колонка 3 - дата окончания работ
+                    inventoryCounter = 0;
+                    for (int column =4; column<109; column++)// колонки с данными 4-108 для этажей, 4-31 для 2-го этажа, 4-27 для лестницы Н1
                     {
                         temp = wSheetSource.Cells[row, column].Text;
                         if (temp!= "")
@@ -161,29 +166,30 @@ namespace AOSR
             //
             // заполнение описи в случае более 5 приложений к акту
             //
-            if (fileToAdd.Count>5)
+            if (fileToAdd.Count > 5)
             {
+                inventoryCounter++;
                 Excel.Application appInventory = null;
                 Excel.Workbook wBookInventory = null;
                 Excel.Worksheet wSheetInventory = null;
                 wSheet.Cells[54, 1].RowHeight = 15;
-                wSheet.Cells[54, 1].Value = "в соответствием с листом описи";
+                wSheet.Cells[54, 1].Value = "в соответствием с реестром прилагаемых документов №" + inventoryCounter;
                 try
                 {
                     appInventory = new Excel.Application();
                     wBookInventory = appInventory.Workbooks.Open(fileAppl);
                     wSheetInventory = (Excel.Worksheet)wBookInventory.Sheets[1];
-                    wSheetInventory.Cells[7, 2].Value = "Опись передаваемых документов к акту " + docNumber;
+                    wSheetInventory.Cells[7, 2].Value = "Реестр прилагаемых документов №" + inventoryCounter + " к АОСР" + docNumber;
                     int i = 1;
                     int n = 11;
-                    string[] invent = documents.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                    string[] invent = documents.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (string paper in invent)
                     {
                         if (paper != " ")
                         {
                             wSheetInventory.Cells[n, 3].WrapText = false;
                             wSheetInventory.Cells[n, 2].Value = i;
-                            if (paper.Length>60)
+                            if (paper.Length > 60)
                             {
                                 wSheetInventory.Cells[n, 3].WrapText = true;
                                 wSheetInventory.Cells[n, 3].RowHeight = 40;
@@ -214,19 +220,15 @@ namespace AOSR
                     appInventory.Quit();
                 }
             }
-            else wSheet.Cells[54, 1].Value = documents;
-            if (subcontractor == "")
+            else
             {
-                wSheet.Cells[25, 1].Value = "";
-                wSheet.Cells[25, 1].RowHeight = 10;
-                wSheet.Cells[26, 1].Value = "";
-                wSheet.Cells[26, 1].RowHeight = 10;
-                wSheet.Cells[71, 1].Value = "";
-                wSheet.Cells[71, 1].RowHeight = 10;
-                wSheet.Cells[72, 1].Value = "";
-                wSheet.Cells[72, 1].RowHeight = 10;
-                wSheet.Cells[73, 1].Value = "";
-                wSheet.Cells[73, 1].RowHeight = 10;
+                //wSheet.Cells[54, 1].RowHeight = 60;
+                if(documents.Length < 100) rowheight = 20;
+                else if (documents.Length < 300) rowheight = 50;
+                else if (documents.Length < 500) rowheight = 80;
+                else rowheight = 120;
+                wSheet.Cells[54, 1].RowHeight = rowheight;
+                wSheet.Cells[54, 1].Value = documents;
             }
         }
 
@@ -285,7 +287,6 @@ namespace AOSR
         //
         private void MakePDF(string pdfFileName, List<string> fileArray)
         {
-
             try
             {
                 // Open the output document
@@ -306,9 +307,9 @@ namespace AOSR
                         // ...and add it to the output document.
                         outputDocument.AddPage(page);
                     }
-
-                    outputDocument.Save(pdfFileName);
                 }
+                pdfFileName = pdfFileName.Remove(pdfFileName.Length - 4, 4) + " с приложенияме.pdf";
+                outputDocument.Save(pdfFileName);
             }
             catch (Exception ex)
             {
@@ -317,7 +318,6 @@ namespace AOSR
                 //
                 Win.MessageBox.Show(ex.ToString() + " all applications have been saved in separate directory", "PDF saving file error!");
             }
-
         }
 
         //
